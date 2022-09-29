@@ -1,5 +1,5 @@
 pub const LEFTSHIFT: u16 = 42;
-pub const RIGHTSHIFT: u16 = 43;
+pub const RIGHTSHIFT: u16 = 54;
 
 pub const MAX_KEYS: u16 = 112;
 pub const UK: &str = "<UK>"; // Unknown key

