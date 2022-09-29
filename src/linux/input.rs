@@ -1,8 +1,5 @@
-const KEY_RELEASE: i32 = 0;
-const KEY_PRESS: i32 = 1;
-
-const KEY_LEFTSHIFT: u16 = 42;
-const KEY_RIGHTSHIFT: u16 = 43;
+pub const LEFTSHIFT: u16 = 42;
+pub const RIGHTSHIFT: u16 = 43;
 
 pub const MAX_KEYS: u16 = 112;
 pub const UK: &str = "<UK>"; // Unknown key
@@ -62,6 +59,3 @@ pub const SHIFT_KEY_NAMES: [&str; MAX_KEYS as usize] = [
     "<Home>", "<Up>", "<PageUp>", "<Left>", "<Right>", "<End>", "<Down>",
     "<PageDown>", "<Insert>", "<Delete>"
 ];
-
-// Converts a key code to it's ascii representation. Some unprintable keys like escape are printed
-// as a name between angled brackets, i.e. <ESC>
