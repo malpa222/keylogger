@@ -12,5 +12,7 @@ fn main() {
 
     kl = if os.contains("windows") { panic!("sznioooo") } else { Box::new( LinuxKeyLog { } ) };
 
-    kl.start_logging();
+    let kbds = kl.find_keyboard();
+    println!("{:?}", kbds);
+    // kl.start_logging();
 }
